@@ -5,9 +5,9 @@ from booking.models import Guest
 
 
 
-class GuestForm(forms.ModelForm):
+class UserForm(UserCreationForm):
     class Meta:
-        model = Guest
+        model = User
         fields = ['username', 'email', 'password1', 'password2']
         help_texts = {
             'username': 'Enter your username same as your roll no.',
@@ -17,7 +17,7 @@ class LoginForm(forms.Form):
     username = forms.CharField(label='Username', max_length=30)
     password = forms.CharField(label='Password', widget=forms.PasswordInput)
 
-class SignUpForm(UserCreationForm):
+class SignUpForm(forms.ModelForm):
     class Meta:
         model = Guest
         fields = [
