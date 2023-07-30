@@ -130,3 +130,41 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ADMINS = [
     ('Admin', 'admin@example.com'),
 ]
+
+MANAGERS = ADMINS
+
+LOGIN_URL = 'login'
+LOGOUT_URL = 'logout'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
+
+LOGGING = {
+  'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {}
+}
+
+LOGGING['handlers'] = {
+    'console': {
+        'class': 'logging.StreamHandler',
+        'level': 'INFO',
+        'filters': [],
+        'class': 'logging.StreamHandler',
+    },
+}
+
+LOGGING['loggers'] = {
+    'django': {
+        'handlers': ['console'],
+        'level': 'INFO',
+        'propagate': True,
+        'filters': [],
+    }
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST ='smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = '<EMAIL>'
+EMAIL_HOST_PASSWORD = '<PASSWORD>'
