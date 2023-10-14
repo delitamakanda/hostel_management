@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, Http404
 from booking.models import Book, Room, Guest, Hostel
 from django.contrib.auth.decorators import login_required
@@ -6,6 +6,29 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from booking.forms import UserForm, LoginForm, BookingForm, SignUpForm
+from booking.serializers import HostelSerializer
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from silk.profiling.profiler import silk_profile
+
+class HostelViewSet(viewsets.ViewSet):
+    """
+    API endpoint that allows hostels to be viewed
+    """
+    http_method_names = ['get']
+    queryset = Hostel.objects.all()
+
+    @silk_profile(name='Hostels list')
+    def list(self, request):
+        name = request.GET.get('name')
+        qs = self.queryset
+        if name:
+            qs = qs.filter(name__icontains=name)
+        
+        serializer = HostelSerializer(qs, many=True).data
+        return Response(serializer, status=status.HTTP_200_OK)
+
+
 
 def signup(request):
     if request.method == 'POST':

@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'silk',
+    'rest_framework',
     'booking.apps.BookingConfig',
 ]
 
@@ -48,7 +50,24 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'silk.middleware.SilkyMiddleware',
+    'querycount.middleware.QueryCountMiddleware',
 ]
+
+MIDDLEWARE += ['pyinstrument.middleware.ProfilerMiddleware']
+
+QUERYCOUNT = {
+    'THRESHOLDS': {
+        'MEDIUM': 50,
+        'HIGH': 200,
+        'MIN_TIME_TO_LOG':0,
+        'MIN_QUERY_COUNT_TO_LOG':0
+    },
+    'DISPLAY_DUPLICATES': True,
+    'RESPONSE_HEADER': 'X-DjangoQueryCount-Count',
+    'IGNORE_SQL_PATTERNS': [],
+    'IGNORE_REQUEST_PATTERNS': [],
+}
 
 ROOT_URLCONF = 'hostelmanagement.urls'
 
@@ -162,9 +181,4 @@ LOGGING['loggers'] = {
     }
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS = True
-EMAIL_HOST ='smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = '<EMAIL>'
-EMAIL_HOST_PASSWORD = '<PASSWORD>'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
