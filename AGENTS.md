@@ -12,7 +12,7 @@
 - Prefer deterministic dependency additions (pin versions in `requirements.txt`).
 
 ## Coding Conventions
-- Keep functions and views small; factor shared behaviour into helpers inside `booking/` if logic is reused.
+- Keep functions and views small; factor shared behavior into helpers inside `booking/` if logic is reused.
 - Use Django ORM query optimisations (e.g., `select_related`, `prefetch_related`) when hitting the database inside loops.
 - For DRF viewsets, restrict `http_method_names` and rely on serializers for validation.
 - Avoid shadowing Django auth helpers (e.g., keep `django.contrib.auth.login` import as `auth_login` if creating a view named `login`).
