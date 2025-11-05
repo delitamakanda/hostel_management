@@ -3,7 +3,7 @@ from django.http import HttpResponse, Http404
 from booking.models import Book, Room, Guest, Hostel
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login as login_view, logout as logout_view
 from django.contrib import messages
 from booking.forms import UserForm, LoginForm, BookingForm, SignUpForm
 from booking.serializers import HostelSerializer
@@ -41,7 +41,7 @@ def signup(request):
             user = authenticate(request, username=cd['username'], password=cd['password1'])
             if user is not None:
                 if user.is_active:
-                    login(request, user)
+                    login_view(request, user)
                     messages.success(request, 'Account created successfully')
                     return redirect('login/edit/')
                 else:
@@ -50,6 +50,8 @@ def signup(request):
             else:
                 messages.error(request, 'Invalid username or password')
                 return redirect('register/')
+            return redirect('login/')
+        return render(request, 'registration/signup.html', {'form': form})
     else:
         form = UserForm()
         return render(request, 'registration/signup.html', {'form': form})
@@ -62,7 +64,7 @@ def login(request):
             user = authenticate(request, username=cd['username'], password=cd['password'])
             if user is not None:
                 if user.is_active:
-                    login(request, user)
+                    login_view(request, user)
                     messages.success(request, 'Logged in successfully')
                     return redirect('home/')
                 else:
@@ -71,28 +73,33 @@ def login(request):
             else:
                 messages.error(request, 'Invalid username or password')
                 return redirect('login/')
+        return render(request, 'registration/login.html', {'form': form})
     else:
         form = LoginForm()
         return render(request, 'registration/login.html', {'form': form})
 
+@login_required(login_url='login/')
 def logout(request):
-    logout(request)
+    logout_view(request)
     messages.success(request, 'Logged out successfully')
     return redirect('login/')
 
 def hostel_detail_view(request):
     pass
 
+@login_required(login_url='login/')
 def edit(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST, instance=request.user.guest)
         if form.is_valid():
             form.save()
             return redirect('home/')
+        return render(request, 'edit.html', {'form': form})
     else:
         form = SignUpForm(instance=request.user.guest)
         return render(request, 'edit.html', {'form': form})
 
+@login_required(login_url='login/')
 def select(request):
     if request.user.guest.room:
         room_id_old = request.user.guest.room.id
@@ -122,6 +129,7 @@ def select(request):
                     pass
             form.save()
             return redirect('home/')
+        return render(request, 'edit.html', {'form': form})
     else:
         form = BookingForm(instance=request.user.guest)
         guest_gender = request.user.guest.gender
@@ -150,6 +158,7 @@ def select(request):
         form.fields['room'].queryset = x
         return render(request, 'select.html', {'form': form})
 
+@login_required(login_url='login/')
 def home(request):
     return render(request, 'home.html')
 
