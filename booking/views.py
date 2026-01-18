@@ -9,7 +9,6 @@ from booking.forms import UserForm, LoginForm, BookingForm, SignUpForm
 from booking.serializers import HostelSerializer
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from silk.profiling.profiler import silk_profile
 
 class HostelViewSet(viewsets.ViewSet):
     """
@@ -18,7 +17,6 @@ class HostelViewSet(viewsets.ViewSet):
     http_method_names = ['get']
     queryset = Hostel.objects.all()
 
-    @silk_profile(name='Hostels list')
     def list(self, request):
         name = request.GET.get('name')
         qs = self.queryset
