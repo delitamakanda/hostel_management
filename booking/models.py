@@ -1,68 +1,65 @@
 from django.db import models
-from django.contrib.auth.models import User
 
-class Guest(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    gender_choices = [('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')]
-    guest_name = models.CharField(max_length=100)
-    guest_email = models.EmailField()
-    guest_phone = models.CharField(max_length=20)
-    enrollment_no = models.CharField(max_length=20)
-    date_of_birth = models.DateField(max_length=10, help_text='format: DD/MM/YYYY')
-    gender = models.CharField(max_length=10, choices=gender_choices)
-    room = models.ForeignKey('Room', on_delete=models.CASCADE)
-    room_alloted = models.BooleanField(default=False)
-    book = models.ForeignKey('Book', on_delete=models.CASCADE, default=None, blank=True)
-
-    def __str__(self):
-        return self.guest_name
-
+class Property(models.Model):
+    name = models.CharField(max_length=100)
+    photo = models.ImageField(upload_to='property_photos', blank=True)
+    location = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
+    
     class Meta:
-        ordering = ['-date_of_birth']
-        verbose_name = 'Guest'
-        verbose_name_plural = 'Guests'
+        verbose_name = 'Property'
+        verbose_name_plural = 'Properties'
+        ordering = ['name']
+    
+    def __str__(self) -> str:
+        return self.name
+
 
 class Room(models.Model):
-    room_choices = [('S', 'Single'), ('D', 'Double'), ('P', 'Reserved'), ('B', 'Both')]
-    room_no = models.CharField(max_length=20)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='rooms')
     name = models.CharField(max_length=100)
-    room_type = models.CharField(max_length=1, choices=room_choices)
-    vacant = models.BooleanField(default=False)
-    hostel = models.ForeignKey('Hostel', on_delete=models.CASCADE)
+    capacity = models.PositiveSmallIntegerField(default=2)
+    is_available = models.BooleanField(default=True)
+    
+    def __str__(self) -> str:
+        return f"{self.property.name} - {self.name}"
 
-    def __str__(self):
-        return self.room_no
 
     class Meta:
-        ordering = ['-room_no']
+        ordering = ['name']
         verbose_name = 'Room'
         verbose_name_plural = 'Rooms'
 
-class Hostel(models.Model):
-    name = models.CharField(max_length=100)
-    gender_choices = [('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')]
-    gender = models.CharField(max_length=10, choices=gender_choices)
-    warden = models.CharField(max_length=100)
-    caretaker = models.CharField(max_length=100)
-    book = models.ManyToManyField('Book', default=None, blank=True)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        ordering = ['-name']
-        verbose_name = 'Hostel'
-        verbose_name_plural = 'Hostels'
-
 class Book(models.Model):
-    code = models.CharField(max_length=20)
-    room_choice = [('S', 'Single'), ('D', 'Double'), ('P', 'Reserved'), ('B', 'Both')]
-    room_type = models.CharField(max_length=1, choices=room_choice, default='S')
-
-    def __str__(self):
-        return self.code
+    class Status(models.TextChoices):
+        HOLD = "HOLD"
+        RESERVED = "RESERVED"
+        BOOKED = "BOOKED"
+        CANCELLED = "CANCELLED"
+        
+    room = models.ForeignKey(Room, on_delete=models.PROTECT, related_name='booked_rooms')
+    check_in_date = models.DateField()
+    check_out_date = models.DateField()
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.HOLD)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    code = models.CharField(max_length=10, unique=True)
 
     class Meta:
-        ordering = ['-code']
         verbose_name = 'Book'
         verbose_name_plural = 'Books'
+        indexes = [
+            models.Index(fields=['check_in_date', 'check_out_date']),
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['room_id', 'check_in_date', 'check_out_date']),
+            models.Index(fields=['code']),
+        ]
+        ordering = ['-created_at']
+        unique_together = ['room', 'check_in_date', 'check_out_date']
+        constraints = [
+            # exclusion constraint for booking same room on same date
+            models.CheckConstraint(
+                condition=models.Q(check_in_date__lt=models.F('check_out_date')),
+                name='check_date_order'
+            ),
+        ]

@@ -4,17 +4,9 @@ from rest_framework import routers
 
 
 router = routers.DefaultRouter()
-router.register(r'hostels', views.HostelViewSet)
 
 urlpatterns = [
-    path('', views.home, name='home'),
-    path('login/', views.login, name='login'),
-    path('logout/', views.logout, name='logout'),
-    path('register/', views.signup, name='signup'),
-    path('hostels/<str:name>/', views.hostel_detail_view, name='hostel'),
-    path('login/edit/', views.edit, name='edit'),
-    path('login/select/', views.select, name='select'),
-    path('register/login/edit/', views.edit, name='update'),
+    path('healthcheck/', views.HealthCheckApiView.as_view(), name='healthcheck'),
 ]
 
 urlpatterns += router.urls

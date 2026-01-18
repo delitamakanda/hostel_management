@@ -22,7 +22,9 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticStorage",
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "LOCATION": BASE_DIR / "static",
+        "URL": "/static/",
     }
 }
 
@@ -61,6 +63,8 @@ INSTALLED_APPS = [
 
 INSTALLED_APPS += [
     'booking',
+    'users',
+    'common',
 ]
 
 SITE_ID = 1
@@ -100,7 +104,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'hostelmanagement.wsgi.application'
-
+ASGI_APPLICATION = 'hostelmanagement.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -135,9 +139,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fr-fr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Paris'
 
 USE_I18N = True
 
