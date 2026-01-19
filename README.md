@@ -6,15 +6,15 @@ A Django-based hostel management system that streamlines how residents, rooms, a
 
 ## Features
 
-- **Guest onboarding** – Sign up, edit guest profiles, and persist personal information such as contact details and enrolment numbers.
+- **Users onboarding** – Sign up, edit guest profiles, and persist personal information such as contact details and enrolment numbers.
 - **Room allocation** – Allow guests to select an available room based on their gender and booking preferences. Occupancy is tracked automatically when a room is selected or released.
-- **Hostel catalogue** – Maintain metadata for each hostel including its warden, caretaker, and supported room types.
-- **REST API** – Query the list of hostels via `/api/hostels/` with optional case-insensitive filtering by name.
+- **Property catalogue** – Maintain metadata for each hostel including its warden, caretaker, and supported room types.
+- **REST API** – Query the list of hostels via `/api/properties/` with optional case-insensitive filtering by name.
 
 ## Requirements
 
-- Python 3.11+
-- Django 4.2 (pinned in `requirements.txt`)
+- Python 3.13+
+- Django 6.0 (pinned in `requirements.txt`)
 - SQLite (bundled with Python, used by default via Django)
 
 ## Getting Started
@@ -57,8 +57,8 @@ Visit `http://127.0.0.1:8000/` to access the web interface. The Django admin is 
 The project exposes a read-only endpoint for hostels through Django REST Framework:
 
 ```http
-GET /api/hostels/
-GET /api/hostels/?name=Sunrise
+GET /api/properties/
+GET /api/properties/?name=Sunrise
 ```
 
 Responses return JSON encoded hostel objects, and the `name` query parameter allows case-insensitive partial matching.
