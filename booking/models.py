@@ -63,3 +63,23 @@ class Book(models.Model):
                 name='check_date_order'
             ),
         ]
+        
+class RatePlan(models.Model):
+    code = models.CharField(max_length=80, unique=True)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='rate_plans')
+    price_per_night = models.DecimalField(max_digits=8, decimal_places=2)
+    min_nights = models.PositiveSmallIntegerField(default=1)
+    max_nights = models.PositiveSmallIntegerField(null=True, blank=True)
+    refundable = models.BooleanField(default=True)
+    cancellation_deadline_days = models.PositiveSmallIntegerField(default=7)
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self) -> str:
+        return f"{self.room.property.name} - {self.room.name} - {self.code}"
+    
+    class Meta:
+        verbose_name = 'Rate Plan'
+        verbose_name_plural = 'Rate Plans'
+        ordering = ['room__property__name', 'room__name', 'code']
+        unique_together = ['room', 'code']
+        

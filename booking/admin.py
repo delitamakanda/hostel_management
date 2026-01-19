@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin.models import DELETION
 
-from booking.models import Book, Room, Property
+from booking.models import Book, Room, Property, RatePlan
 from django.utils.html import escape
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -43,3 +43,4 @@ class PropertyAdmin(admin.ModelAdmin):
 
 admin.site.register(Book)
 admin.site.register(Room)
+admin.site.register(RatePlan)
