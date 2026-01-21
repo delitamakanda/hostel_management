@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    POC Front API
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Welcome to the Hostel Management System</h1>
+    <p>This platform allows you to manage your hostel's bookings, students, and staff.</p>
+
+<div class="grid">
+        <div>
+            <label for="property">Propriété</label>
+            <select id="property">
+                <option value="">Chargement...</option>
+            </select>
+        </div>
+        <div>
+            <label for="guests">Voyageurs</label>
+            <input id="guests" type="number" min="1" value="1">
+        </div>
+        <div>
+            <label for="checkin">Arrivée</label>
+            <input id="checkin" type="date">
+        </div>
+        <div>
+            <label for="checkout">Départ</label>
+            <input id="checkout" type="date">
+        </div>
+    </div>
+    <div class="actions">
+        <button id="load-rooms">Charger les chambres</button>
+        <button id="refresh-properties" class="secondary">Rafraîchir les propriétés</button>
+    </div>
+</div>
+
+    <div class="card">
+    <h3>Chambres disponibles</h3>
+    <div id="rooms" class="room-list"></div>
+</div>
+
+    <div class="card">
+    <div id="message" class="message info">Sélectionnez une propriété pour commencer.</div>
+</div>
+
+    <script>
+    const apiBase = "{{ api_base_url }}";
+    const propertySelect = document.getElementById("property");
+    const roomsContainer = document.getElementById("rooms");
+    const message = document.getElementById("message");
+    const guestsInput = document.getElementById("guests");
+    const checkinInput = document.getElementById("checkin");
+    const checkoutInput = document.getElementById("checkout");
+
+    const setMessage = (text, type = "info") => {
+        message.textContent = text;
+        message.className = `message ${type}`;
+    };
+
+    const loadProperties = async () => {
+        setMessage("Chargement des propriétés...", "info");
+        try {
+            const response = await fetch(`${apiBase}/properties/`);
+            if (!response.ok) {
+                throw new Error(`Erreur ${response.status}`);
+            }
+            const properties = await response.json();
+            propertySelect.innerHTML = "";
+            const placeholder = document.createElement("option");
+            placeholder.value = "";
+            placeholder.textContent = "Sélectionner une propriété";
+            propertySelect.appendChild(placeholder);
+
+            properties.forEach((property) => {
+                const option = document.createElement("option");
+                option.value = property.id;
+                option.textContent = `${property.name} · ${property.location}`;
+                propertySelect.appendChild(option);
+            });
+            setMessage("Propriétés chargées.", "success");
+        } catch (error) {
+            setMessage(`Impossible de charger les propriétés: ${error.message}`, "error");
+        }
+    };
+
+    const renderRooms = (rooms) => {
+        roomsContainer.innerHTML = "";
+        if (!rooms.length) {
+            roomsContainer.innerHTML = "<p>Aucune chambre disponible pour cette propriété.</p>";
+            return;
+        }
+        rooms.forEach((room) => {
+            const card = document.createElement("div");
+            card.className = "room-item";
+            card.innerHTML = `
+                <div>
+                    <h4>${room.name}</h4>
+                    <p>Capacité: ${room.capacity} personnes</p>
+                    <span class="badge">ID ${room.id}</span>
+                </div>
+                <div>
+                    <button data-room-id="${room.id}">Réserver</button>
+                </div>
+            `;
+            roomsContainer.appendChild(card);
+        });
+    };
+
+    const loadRooms = async () => {
+        const propertyId = propertySelect.value;
+        if (!propertyId) {
+            setMessage("Veuillez sélectionner une propriété.", "error");
+            return;
+        }
+        const url = new URL(`${apiBase}/rooms/`, window.location.origin);
+        url.searchParams.set("property_id", propertyId);
+        setMessage("Chargement des chambres...", "info");
+        try {
+            const response = await fetch(url.toString());
+            if (!response.ok) {
+                throw new Error(`Erreur ${response.status}`);
+            }
+            const rooms = await response.json();
+            const minGuests = Number(guestsInput.value) || 1;
+            const filteredRooms = rooms.filter((room) => room.capacity >= minGuests);
+            renderRooms(filteredRooms);
+            setMessage("Chambres chargées. Vous pouvez réserver.", "success");
+        } catch (error) {
+            setMessage(`Impossible de charger les chambres: ${error.message}`, "error");
+        }
+    };
+
+    const createBooking = async (roomId) => {
+        const checkin = checkinInput.value;
+        const checkout = checkoutInput.value;
+        if (!checkin || !checkout) {
+            setMessage("Veuillez renseigner les dates d'arrivée et de départ.", "error");
+            return;
+        }
+        const payload = {
+            room_id: Number(roomId),
+            checkin_date: checkin,
+            checkout_date: checkout,
+        };
+        setMessage("Création de la réservation...", "info");
+        try {
+            const response = await fetch(`${apiBase}/book/`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(payload),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || "Erreur lors de la réservation");
+            }
+            setMessage(`Réservation créée (ID ${data.id}). Statut: ${data.status}.`, "success");
+        } catch (error) {
+            setMessage(`Impossible de créer la réservation: ${error.message}`, "error");
+        }
+    };
+
+    document.getElementById("load-rooms").addEventListener("click", loadRooms);
+    document.getElementById("refresh-properties").addEventListener("click", loadProperties);
+    roomsContainer.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-room-id]");
+        if (!button) {
+            return;
+        }
+        createBooking(button.dataset.roomId);
+    });
+
+    loadProperties();
+    </script>
+{% endblock %}

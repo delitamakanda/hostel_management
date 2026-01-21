@@ -1,12 +1,13 @@
 from datetime import timedelta
 
+from django.shortcuts import render
 from rest_framework.views import APIView
 from django.utils.timezone import timezone, now
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAdminUser
 
-from booking.models import Book, Room, Property, RatePlan
+from booking.models import Book, Room, Property
 from booking.serializers import BookCreateSerializer, BookSerializer, PropertySerializer, RoomSerializer, \
     RatePlanSerializer, RatePlanCreateSerializer
 from booking.utils.pricing import calculate_occupancy_rate, calculate_revenue, calculate_no_shows
@@ -185,3 +186,8 @@ class AdminMetricsListApiView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
+def api_root(request):
+    return render(request, 'poc_front.html', {
+        'api_base_url': '/api'
+    })

@@ -14,4 +14,5 @@ urlpatterns = [
     path('admin/books/<int:book_id>/', views.AdminRoomDetailApiView.as_view(), name='book-admin-detail'),
     path('admin/rate-plans/', views.AdminRatePlanCreateApiView.as_view(), name='rate-plan-admin-list'),
     path('admin/metrics/', views.AdminMetricsListApiView.as_view(), name='metrics-admin-list'),
+    path('poc/', views.api_root, name='api-poc'),
 ]
